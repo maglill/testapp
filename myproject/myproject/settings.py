@@ -19,9 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-@d&y)uvfwnzbi1tked0y*rk1op=#4go954=1-0+*1f^ej%#pk6"
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -42,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoizeMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -119,6 +117,29 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 
+# herokuのための追記
+
+#databaseの設定を上書き
+import dj_database_url
+DATABASES['default'] = dj_database_url.config()
+#httpsへの対応
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FOWARDED_PROTO', 'https')
+#独自ドメインを記述（*はなんでも良いという意味）
+ALLOWED_HOSTS = ['*']
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+#エラー時にセキュリティキー等が表示されてしまうため，セキュリティのためになしにしておく
+DEBUG = False
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+#ソースコード上からセキュリティのためにSECRET_KEYを削除したが，参照する命令を残しておく
+if not DEBUG:
+    SECRET_KEY = os.environ['SECRET_KEY']
 
 
 
